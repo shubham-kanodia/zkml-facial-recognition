@@ -1,0 +1,8 @@
+node_modules/
+
+output/
+!output/.gitkeep
+
+ptau-ceremony/*.zkey
+ptau-ceremony/*.ptau
+ptau-ceremony/*.json
