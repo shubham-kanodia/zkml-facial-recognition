@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 
 import type { NextPage } from "next";
 import Head from "next/head";
-import dynamic from "next/dynamic";
 
 import axios from "axios";
 import { Tensor, InferenceSession } from "onnxjs";
