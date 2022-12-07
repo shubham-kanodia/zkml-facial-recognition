@@ -4,11 +4,11 @@ import { ethers } from "ethers";
 // 5: Goerli
 // 1337: localhost network
 
-const networkId = process.env.NEXT_PUBLIC_NETWORK_ID || "31337";
+const networkId = process.env.NEXT_PUBLIC_NETWORK_ID || "1337";
 const networks = {
   1: "mainnet",
   5: "goerli",
-  31337: "localhost",
+  1337: "localhost",
 };
 export const networkName = networks[networkId];
 
