@@ -33,7 +33,7 @@ const videoConstraints = {
   facingMode: "user",
 };
 
-const VERIFIER_CONTRACT_ADDR = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
+const VERIFIER_CONTRACT_ADDR = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const VERIFIER_CONTRACT_ABI: any = metadata.abi;
 
 const mlModelUrl = "/frontend_model.onnx";
@@ -294,7 +294,7 @@ const Home: NextPage = () => {
                   <button
                     className={primaryButtonClasses}
                     onClick={() => verifyProof(proof, publicSignals)}
-                    disabled={!isImageAndProofPresent}
+                    disabled={!Boolean(proof)}
                   >
                     Verify Proof on chain
                   </button>
