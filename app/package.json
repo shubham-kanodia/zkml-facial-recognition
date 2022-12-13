@@ -17,6 +17,7 @@
     "react-dom": "18.2.0",
     "react-json-view": "^1.21.3",
     "react-toastify": "^9.1.1",
+    "react-webcam": "^7.0.1",
     "snarkjs": "0.4.10"
   },
   "devDependencies": {

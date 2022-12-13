@@ -6,6 +6,7 @@ import Head from "next/head";
 import axios from "axios";
 import { Tensor, InferenceSession } from "onnxjs";
 import { ToastContainer, toast } from "react-toastify";
+import Webcam from "react-webcam";
 
 import Address from "../components/Address";
 import ClassifyResult from "../components/ClassifyResult";
@@ -25,6 +26,12 @@ import { computeQuantizedEmbedding } from "../utils/model";
 import metadata from "../data/Verifier.json";
 
 import "react-toastify/dist/ReactToastify.css";
+
+const videoConstraints = {
+  width: 1280,
+  height: 720,
+  facingMode: "user",
+};
 
 const VERIFIER_CONTRACT_ADDR = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
 const VERIFIER_CONTRACT_ABI: any = metadata.abi;
@@ -55,16 +62,21 @@ const Home: NextPage = () => {
 
   const [selectedImage, setSelectedImage] = useState<any>();
 
-  const fileInput = React.useRef(null);
+  const [image, setImage] = useState(null);
+
+  const videoConstraints = {
+    width: 1280,
+    height: 720,
+    facingMode: "user",
+  };
 
   const preProcess = async (fileInput: any): Promise<Tensor | null> => {
     let tensorData;
     try {
       if (!fileInput) return null;
 
-      const file = fileInput.files[0];
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", fileInput);
 
       const response = await axios.post(
         "http://localhost:8000/embeddings",
@@ -103,11 +115,16 @@ const Home: NextPage = () => {
     }
   };
 
-  const classifyAndGenerateProof = async (session: any) => {
+  const classifyAndGenerateProof = async (base64Image: any, session: any) => {
     if (!session) return;
 
     try {
-      const preProcessedData = await preProcess(fileInput.current);
+      const result = await fetch(base64Image);
+      const blob = await result.blob();
+
+      const file = new File([blob], "filename.jpeg");
+
+      const preProcessedData = await preProcess(file);
       if (!preProcessedData) return;
 
       let [modelOutput, _] = await runModel(session, preProcessedData);
@@ -190,6 +207,18 @@ const Home: NextPage = () => {
 
   const isMetamaskConnected = !!account;
 
+  const webcamRef = React.useRef(null);
+  const capture = React.useCallback(() => {
+    //@ts-ignore
+    const imageSrc = webcamRef?.current.getScreenshot();
+    setImage(imageSrc);
+  }, [webcamRef]);
+
+  useEffect(() => {
+    if (!image || !session) return;
+    classifyAndGenerateProof(image, session);
+  }, [image, session]);
+
   return (
     <div className="min-h-screen items-center py-2">
       <Head>
@@ -231,29 +260,32 @@ const Home: NextPage = () => {
 
         <p className="mt-3 text-2xl">{appDescription}</p>
 
-        <div className="my-12">
+        <div className="my-2">
+          {/* <WebcamCapture setImage={setImage} /> */}
+          <Webcam
+            audio={false}
+            height={720}
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            width={1280}
+            videoConstraints={videoConstraints}
+            className="w-6/12 mx-auto"
+          />
+          {/* <button onClick={capture}>Capture photo</button> */}
+        </div>
+
+        <div className="my-12 mt-6">
           {!isModelLoaded && <p>Loading model ...</p>}
 
           {isModelLoaded && (
             <div className="flex flex-col gap-8 items-center">
-              <input
-                type="file"
-                ref={fileInput}
-                className="ml-4 mb-4 block text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 text-center cursor-pointer"
-                onChange={onImageChange}
-              />
-              {selectedImage && (
-                <div>
-                  <h2 className="text-lg font-semibold mb-4">Image Preview</h2>
-                  <img id="target" src={selectedImage} className="w-full" />
-                </div>
-              )}
               <div className="flex gap-2 mt-4">
                 <div>
                   <button
                     className={primaryButtonClasses}
-                    onClick={() => classifyAndGenerateProof(session)}
-                    disabled={!isImageLoaded}
+                    // onClick={() => classifyAndGenerateProof(image, session)}
+                    onClick={capture}
+                    // disabled={!image}
                   >
                     Classify and Generate Proof
                   </button>
